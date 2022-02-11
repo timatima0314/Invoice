@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>請求書作成アプリ</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="main.css">
+    <script src="https://unpkg.com/vue@3.0.0/dist/vue.global.js"></script>
+</head>
+
+<body>
+    <h1 class="title">請求書作成</h1>
+    <div id="app">
+        <div class="basic wrapper">
+            <div class="basic box">
+                <h2 class="basic heading">基本情報</h2>
+                <div class="basic content">
+                    <div class="basic__el flex">
+                        <div class="module">
+                            <div class="module__el">
+                                <label class="module__label" for="suppliers">取引先</label>
+                                <span class="module__rounded-label">必須</span>
+                            </div>
+                            <input class="module__input--large" for="suppliers" type="text" v-model="Suppliers">
+                        </div>
+
+                        <div class="module hl--ma20">
+                            <div class="module__el">
+                                <label class="module__label" for="honorificTitle">敬称</label>
+                            </div>
+                            <select for="honorificTitle" v-model="SelectedHoTi">
+                                <option for="honorificTitle" v-for="item in HonorificTitle" :value="item">{{item}}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="module">
+                        <div class="module__el">
+                            <label class="module__label" for="invoiceNumber">請求書番号</label>
+                            <span class="module__rounded-label">必須</span>
+                        </div>
+                        <input class="module__input--large" for="invoiceNumber" type="text" v-model="InvoiceNumber">
+                    </div>
+                    <div class="module">
+                        <div class="module__el">
+                            <label class="module__label" for="issue">発行日</label>
+                        </div>
+                        <input for="issue" type="date" v-model="Issue">
+                        <input class="hl--ma20" for="issue" type="checkbox">
+                        <span class="module__txt">印字する</span>
+                    </div>
+                    <div class="module">
+                        <div class="module__el">
+                            <label class="module__label" for="payment">支払期限</label>
+                        </div>
+                        <input for="payment" type="date" v-model="Payment">
+                        <input class="hl--ma20" for="payment" type="checkbox">
+                        <span class="module__txt">印字する</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="billing wrapper">
+            <div class="billing box">
+                <h2 class="billing heading">請求元情報</h2>
+                <div class="billing content">
+                    <div class="module">
+                        <div class="module__el">
+                            <label class="module__label" for="name">氏名</label>
+                            <span class="module__rounded-label">必須</span>
+                        </div>
+                        <input class="module__input--medium" for="name" type="text" v-model="Name">
+
+                    </div>
+                    <div class="module">
+                        <div class="module__el">
+                            <label class="module__label" for="company">会社名</label>
+                        </div>
+                        <input class="module__input--large" for="company" type="text" v-model="Company">
+                    </div>
+                    <div class="module">
+                        <div class="module__el">
+                            <label class="module__label" for="postCode">郵便番号</label>
+                            <span class="module__rounded-label">必須</span>
+                        </div>
+                        <input class="module__input--medium" for="postCode" type="text" v-model="PostCode">
+                    </div>
+                    <div class="module">
+                        <div class="module__el">
+                            <label class="module__label" for="address">住所</label>
+                            <span class="module__rounded-label">必須</span>
+                        </div>
+                        <input class="module__input--large" for="address" type="text" v-model="Address">
+                    </div>
+                    <div class="billing flex">
+                        <div class="module">
+                            <div class="module__el">
+                                <label class="module__label" for="tel">電話番号</label>
+                                <span class="module__rounded-label">必須</span>
+                            </div>
+                            <input class="module__input--medium" for="tel" type="text" v-model="Tel">
+                        </div>
+                        <div class="module hl--ma20">
+                            <div class="module__el">
+                                <label class="module__label" for="mail">メールアドレス</label>
+                                <span class="module__rounded-label">必須</span>
+                            </div>
+                            <input class="module__input--medium" for="mail" type="text" v-model="Mail">
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="item wrapper">
+            <div class="item box">
+                <h2 class="item heading">品目明細</h2>
+                <div class="item content">
+                    <div class="item__el ">
+                        <div class="item__el-flex">
+                            <div class="item__el-name item">
+                                <label class="item__label" for="suppliers">品目明細</label>
+                                <span class="module__rounded-label">必須</span>
+                            </div>
+                            <div class="item__el-name quantity">
+                                <label class="item__label" for="suppliers">数量</label>
+                            </div>
+                            <div class="item__el-name unit">
+                                <label class="item__label" for="suppliers">単位</label>
+                            </div>
+                            <div class="item__el-name price">
+                                <label class="item__label" for="suppliers">単価</label>
+                            </div>
+                            <div class="item__el-name tax">
+                                <label class="item__label tax" for="suppliers">税区分</label>
+                            </div>
+                            <div class="item__el-name money">
+                                <label class="item__label" for="suppliers">金額</label>
+                            </div>
+
+                        </div>
+
+                    </div>
+                    <ul class="item__list">
+                        <li class="item__list-item">
+                            <div class="item__list-item-el">
+                                <div class="item__list-item-el-flex">
+                                    <input class="item__list-input item">
+                                    <input class="item__list-input quantity">
+                                    <input class="item__list-input unit">
+                                    <input class="item__list-input price">
+                                    <input class="item__list-input tax">
+                                    <div class="item__list-input money"><div>
+
+                                </div>
+
+                            </div>
+
+                        </li>
+                        <li class="item__list-item">
+                            <div class="item__list-item-el">
+                                <div class="item__list-item-el-flex">
+                                    <input class="item__list-input item">
+                                    <input class="item__list-input quantity">
+                                    <input class="item__list-input unit">
+                                    <input class="item__list-input price">
+                                    <input class="item__list-input tax">
+                                    <div class="item__list-input money"><div>
+
+                                </div>
+
+                            </div>
+
+                        </li>
+
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="payee wrapper">
+            <div class="payee box">
+                <h2 class="payee heading">振込先・備考</h2>
+                <div class="payee content">
+                    <div class="module">
+                        <div class="module__el">
+                            <label class="module__label" for="payee">振込先</label>
+                            <span class="module__rounded-label">必須</span>
+                        </div>
+                        <textarea class="module__textarea" for="payee" v-model="Payee">
+                        </textarea>
+                    </div>
+                    <div class="module">
+                        <div class="module__el">
+                            <label class="module__label" for="remarks">備考</label>
+                        </div>
+                        <textarea class="module__textarea" for="remarks" v-model="Remarks">
+                        </textarea>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <!--------------------------------- コンポーネント------------------------->
+        <component-main :suppliers="Suppliers" :invoice_number="InvoiceNumber" :issue="Issue" :payment="Payment"
+            :name="Name" :company="Company" :post_code="PostCode" :address="Address" :tel="Tel" :mail="Mail"
+            :selected_hoti="SelectedHoTi" :payee="Payee" :remarks="Remarks">
+
+        </component-main>
+        <!-- ------------------------------- コンポーネントend----------------------- -->
+    </div>
+    <script type="text/x-template" id="main-template">
+        <div class="com">
+            <div class="com__box">
+                <div class="com__inner">
+                    <div class="com__date">
+                        <div class="com__date-block">
+                            <p class="com__date-text">{{issue}}</p>
+                            <p class="com__date-text">請求番号：{{invoice_number}}</p>
+                        </div>
+                    </div>
+                    <div class="com__heading">請求書</div>
+                    <div class="com__info-block">
+                        <div class="com__info-inner">
+                            <div class="com__info-left-area">
+                                <div class="com__info-el_flex">
+                                    <div class="com__info-suppliers">{{suppliers}}</div>
+                                    <span class="com__info-honorificTitle hl--ma20">{{selected_hoti}}</span>
+                                </div>
+                                <p class="com__info-text">下記の通りご請求申し上げます。</p>
+                                <div class="com__info-totalAmount"><span
+                                        class="com__info-totalAmount--span">ご請求金額</span>￥1000000000</div>
+                                <p class="com__info-text">お支払い期限：{{payment}}</p>
+                            </div>
+                            <div class="com__info-right-area">
+                                <div class="com__info-name">{{name}}text text</div>
+                                <div class="com__info-company">{{company}}texttext株式会社</div>
+                                <div class="com__info-postCode">〒{{post_code}}xxx-xxxxx</div>
+                                <div class="com__info-address">{{address}}textetexttexttext</div>
+                                <div class="com__info-tel">{{tel}}xxx-xxxx-xxxx</div>
+                                <div class="com__info-mail">{{mail}}xxxxxxxxxxxxxxxxxxx.com</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="com__item-vertical-table-block">
+                        <div class="vertical-table">
+                            <table class="vertical-table__inner">
+                                <thead class="vertical-table__headers">
+                                    <tr class="vertical-table__header-row">
+                                        <th class="vertical-table__header item">品目</th>
+                                        <th class="vertical-table__header quantity">数量</th>
+                                        <th class="vertical-table__header price">単価</th>
+                                        <th class="vertical-table__header price">金額</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="vertical-table__body">
+                                    <tr class="vertical-table__body-row">
+                                        <td class="vertical-table__text">半田 惇志</td>
+                                        <td class="vertical-table__text">10</td>
+                                        <td class="vertical-table__text">4000</td>
+                                        <td class="vertical-table__text">4000</td>
+                                    </tr>
+                                    <tr class="vertical-table__body-row">
+                                        <td class="vertical-table__text">長澤 賢</td>
+                                        <td class="vertical-table__text">4</td>
+                                        <td class="vertical-table__text">1500</td>
+                                        <td class="vertical-table__text">1500</td>
+                                    </tr>
+                                    <tr class="vertical-table__body-row">
+                                        <td class="vertical-table__text">海老江 優太</td>
+                                        <td class="vertical-table__text">4</td>
+                                        <td class="vertical-table__text">500</td>
+                                        <td class="vertical-table__text">500</td>
+                                    </tr>
+                                    <tr class="vertical-table__body-row">
+                                        <td class="vertical-table__text"></td>
+                                        <td class="vertical-table__text"></td>
+                                        <td class="vertical-table__text"></td>
+                                        <td class="vertical-table__text"></td>
+                                    </tr>
+                                    <tr class="vertical-table__body-row">
+                                        <td class="vertical-table__text"></td>
+                                        <td class="vertical-table__text"></td>
+                                        <td class="vertical-table__text"></td>
+                                        <td class="vertical-table__text"></td>
+                                    </tr>
+                                    <tr class="vertical-table__body-row">
+                                        <td class="vertical-table__text"></td>
+                                        <td class="vertical-table__text"></td>
+                                        <td class="vertical-table__text"></td>
+                                        <td class="vertical-table__text"></td>
+                                    </tr>
+
+                                </tbody>
+                                <tfoot class="vertical-table__foot">
+                                    <tr class="vertical-table__foot-row">
+                                        <td class="vertical-table__text vh"></td>
+                                        <td class="vertical-table__text" colspan="2">小計</td>
+                                        <td class="vertical-table__text">500</td>
+                                    </tr>
+                                    <tr class="vertical-table__foot-row">
+                                        <td class="vertical-table__text vh"></td>
+                                        <td class="vertical-table__text" colspan="2">消費税</td>
+                                        <td class="vertical-table__text">500</td>
+                                    </tr>
+                                    <tr class="vertical-table__foot-row">
+                                        <td class="vertical-table__text vh"></td>
+                                        <td class="vertical-table__text" colspan="2">合計</td>
+                                        <td class="vertical-table__text">500</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                        <!-- /.vertical-table -->
+                    </div>
+                    <div class="com__payee-block">
+                        <div class="com__module">
+                            <div class="com__module-heading">振込先</div>
+                            <div class="com__module-content">{{payee}}＊ここに振込先情報が入ります＊</div>
+                        </div>
+                        <div class="com__module">
+                            <div class="com__module-heading">備考</div>
+                            <div class="com__module-content">{{remarks}}＊ここに備考が入ります＊</div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+     </div>
+
+    </script>
+    <script src="main.js"></script>
+</body>
+
+</html>
