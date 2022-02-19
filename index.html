@@ -8,6 +8,8 @@
     <title>請求書作成アプリ</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
     <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://unpkg.com/vue@3.0.0/dist/vue.global.js"></script>
 </head>
 
@@ -50,7 +52,7 @@
                             <label class="module__label" for="issue">発行日</label>
                         </div>
                         <input for="issue" type="date" v-model="Issue">
-                        <input class="hl--ma20" for="issue" type="checkbox">
+                        <input class="hl--ma20" for="issue" type="checkbox" v-model="IssueShow">
                         <span class="module__txt">印字する</span>
                     </div>
                     <div class="module">
@@ -58,7 +60,7 @@
                             <label class="module__label" for="payment">支払期限</label>
                         </div>
                         <input for="payment" type="date" v-model="Payment">
-                        <input class="hl--ma20" for="payment" type="checkbox">
+                        <input class="hl--ma20" for="payment" type="checkbox" v-model="PaymentShow">
                         <span class="module__txt">印字する</span>
                     </div>
                 </div>
@@ -146,38 +148,52 @@
 
                     </div>
                     <ul class="item__list">
-                        <li class="item__list-item">
+                        <li class="item__list-item" v-for="(item,index) in Items" :key="item.id" :id="`id`+index">
                             <div class="item__list-item-el">
                                 <div class="item__list-item-el-flex">
-                                    <input class="item__list-input item">
-                                    <input class="item__list-input quantity">
-                                    <input class="item__list-input unit">
-                                    <input class="item__list-input price">
-                                    <input class="item__list-input tax">
-                                    <div class="item__list-input money"><div>
+                                    <input class="item__list-input item" v-model="Items[index].item">
+                                    <input class="item__list-input quantity" type="number"
+                                        v-model="Items[index].quantity">{{index}}
+                                    <input class="item__list-input unit" v-model="Items[index].unit">
+                                    <input class="item__list-input price" v-model="Items[index].price"
+                                        pattern="^[0-9A-Za-z]+$"><span>円</span>
+                                    <!-- <input class="item__list-input tax" v-model="Items[index].tax"> -->
+                                    <select for="tax" v-model="Items[index].tax">
+                                        <option for="tax" v-for="item in TaxSelect" :value="item">{{item}}</option>
+                                    </select>
+
+                                    <div class="item__list-input money">
+                                        {{Items[index].price * Items[index].quantity}}&nbsp;円
+                                    </div>
+
+                                    <span class="item__delete-button" @click="deleteItems()" :id="index">
+                                        <i class="fa-solid fa-trash-can"></i>
+                                    </span>
 
                                 </div>
-
                             </div>
-
-                        </li>
-                        <li class="item__list-item">
-                            <div class="item__list-item-el">
-                                <div class="item__list-item-el-flex">
-                                    <input class="item__list-input item">
-                                    <input class="item__list-input quantity">
-                                    <input class="item__list-input unit">
-                                    <input class="item__list-input price">
-                                    <input class="item__list-input tax">
-                                    <div class="item__list-input money"><div>
-
-                                </div>
-
-                            </div>
-
                         </li>
 
                     </ul>
+                    <div class="item__footer">
+                        <div class="item__addition-button" @click="createItems"><span
+                                class="item__addition-button--span">＋</span>品目行を追加</div>
+                        <div class="item__result-block">
+                            <div class="item__result-block-mod">
+                                <p class="item__result-block-txt">小計</p>
+                                <div class="item__result">{{subTotal}}&nbsp;円</div>
+                            </div>
+                            <div class="item__result-block-mod">
+                                <p class="item__result-block-txt">消費税</p>
+                                <div class="item__result">{{ConTax}}&nbsp;円</div>
+                            </div>
+                            <div class="item__result-block-mod">
+                                <p class="item__result-block-txt">合計</p>
+                                <div class="item__result">{{Total}}&nbsp;円</div>
+                            </div>
+
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -207,7 +223,9 @@
         <!--------------------------------- コンポーネント------------------------->
         <component-main :suppliers="Suppliers" :invoice_number="InvoiceNumber" :issue="Issue" :payment="Payment"
             :name="Name" :company="Company" :post_code="PostCode" :address="Address" :tel="Tel" :mail="Mail"
-            :selected_hoti="SelectedHoTi" :payee="Payee" :remarks="Remarks">
+            :selected_hoti="SelectedHoTi" :payee="Payee" :remarks="Remarks" :items="Items"
+            :sub_total_array="SubTotalArray" :tax="Tax" :total_amount="TotalAmount" :sub_total="SubTotal" 
+            :issue_conv="IssueConv" :payment_conv="PaymentConv" :issue_show="IssueShow" :payment_show="PaymentShow">
 
         </component-main>
         <!-- ------------------------------- コンポーネントend----------------------- -->
@@ -218,7 +236,7 @@
                 <div class="com__inner">
                     <div class="com__date">
                         <div class="com__date-block">
-                            <p class="com__date-text">{{issue}}</p>
+                            <p class="com__date-text" v-show="issue_show">{{issue_conv}}</p>
                             <p class="com__date-text">請求番号：{{invoice_number}}</p>
                         </div>
                     </div>
@@ -232,8 +250,8 @@
                                 </div>
                                 <p class="com__info-text">下記の通りご請求申し上げます。</p>
                                 <div class="com__info-totalAmount"><span
-                                        class="com__info-totalAmount--span">ご請求金額</span>￥1000000000</div>
-                                <p class="com__info-text">お支払い期限：{{payment}}</p>
+                                        class="com__info-totalAmount--span">ご請求金額</span>￥{{total_amount}}</div>
+                                <p class="com__info-text" v-show="payment_show">お支払い期限：{{payment_conv}}</p>
                             </div>
                             <div class="com__info-right-area">
                                 <div class="com__info-name">{{name}}text text</div>
@@ -257,37 +275,25 @@
                                     </tr>
                                 </thead>
                                 <tbody class="vertical-table__body">
-                                    <tr class="vertical-table__body-row">
-                                        <td class="vertical-table__text">半田 惇志</td>
-                                        <td class="vertical-table__text">10</td>
-                                        <td class="vertical-table__text">4000</td>
-                                        <td class="vertical-table__text">4000</td>
+                                    <tr class="vertical-table__body-row"  v-for="(item,index) in items" :key="item.id">
+                                        <td class="vertical-table__text">{{items[index].item}}</td>
+                                        <td class="vertical-table__text">{{items[index].quantity}}</td>
+                                        <td class="vertical-table__text">{{items[index].price}}</td>
+                                        <td class="vertical-table__text">{{sub_total_array[index]}}&nbsp;円</td>
                                     </tr>
-                                    <tr class="vertical-table__body-row">
-                                        <td class="vertical-table__text">長澤 賢</td>
-                                        <td class="vertical-table__text">4</td>
-                                        <td class="vertical-table__text">1500</td>
-                                        <td class="vertical-table__text">1500</td>
-                                    </tr>
-                                    <tr class="vertical-table__body-row">
-                                        <td class="vertical-table__text">海老江 優太</td>
-                                        <td class="vertical-table__text">4</td>
-                                        <td class="vertical-table__text">500</td>
-                                        <td class="vertical-table__text">500</td>
-                                    </tr>
-                                    <tr class="vertical-table__body-row">
+                                    <tr class="vertical-table__body-row" v-if="items.length < 4">
                                         <td class="vertical-table__text"></td>
                                         <td class="vertical-table__text"></td>
                                         <td class="vertical-table__text"></td>
                                         <td class="vertical-table__text"></td>
                                     </tr>
-                                    <tr class="vertical-table__body-row">
+                                    <tr class="vertical-table__body-row" v-if="items.length < 4">
                                         <td class="vertical-table__text"></td>
                                         <td class="vertical-table__text"></td>
                                         <td class="vertical-table__text"></td>
                                         <td class="vertical-table__text"></td>
                                     </tr>
-                                    <tr class="vertical-table__body-row">
+                                    <tr class="vertical-table__body-row" v-if="items.length < 4">
                                         <td class="vertical-table__text"></td>
                                         <td class="vertical-table__text"></td>
                                         <td class="vertical-table__text"></td>
@@ -299,17 +305,17 @@
                                     <tr class="vertical-table__foot-row">
                                         <td class="vertical-table__text vh"></td>
                                         <td class="vertical-table__text" colspan="2">小計</td>
-                                        <td class="vertical-table__text">500</td>
+                                        <td class="vertical-table__text">{{sub_total}}&nbsp;円</td>
                                     </tr>
                                     <tr class="vertical-table__foot-row">
                                         <td class="vertical-table__text vh"></td>
                                         <td class="vertical-table__text" colspan="2">消費税</td>
-                                        <td class="vertical-table__text">500</td>
+                                        <td class="vertical-table__text">{{tax}}&nbsp;円</td>
                                     </tr>
                                     <tr class="vertical-table__foot-row">
                                         <td class="vertical-table__text vh"></td>
                                         <td class="vertical-table__text" colspan="2">合計</td>
-                                        <td class="vertical-table__text">500</td>
+                                        <td class="vertical-table__text">{{total_amount}}&nbsp;円</td>
                                     </tr>
                                 </tfoot>
                             </table>
@@ -319,11 +325,11 @@
                     <div class="com__payee-block">
                         <div class="com__module">
                             <div class="com__module-heading">振込先</div>
-                            <div class="com__module-content">{{payee}}＊ここに振込先情報が入ります＊</div>
+                            <div class="com__module-content">{{payee}}</div>
                         </div>
                         <div class="com__module">
                             <div class="com__module-heading">備考</div>
-                            <div class="com__module-content">{{remarks}}＊ここに備考が入ります＊</div>
+                            <div class="com__module-content">{{remarks}}</div>
                         </div>
 
                     </div>
@@ -333,6 +339,7 @@
 
     </script>
     <script src="main.js"></script>
+    <script src="sub.js"></script>
 </body>
 
 </html>
